@@ -113,7 +113,7 @@ export default function Home() {
               Pd: I try to make this project like if it was a real product.
             </p>
             <div className="buttons">
-              <a id="go-website" href="https://protected-peak-11732.herokuapp.com/">Watch project</a>
+              <a id="go-website" href="https://github.com/Josafath/portfolio_project.git">Watch project</a>
               <a id="code" href="https://github.com/Josafath/simple-video-chat">Code</a>
             </div>
 
