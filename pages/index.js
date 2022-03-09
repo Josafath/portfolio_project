@@ -94,7 +94,7 @@ export default function Home() {
               For this project I use Nodejs, Express and MongoDB.
             </p>
             <div className="buttons">
-              <a id="go-website" href="https://secret-bayou-84931.herokuapp.com/music/">Watch project</a>
+              <a id="go-website" href="https://jossify-crud.herokuapp.com/music">Watch project</a>
               <a id="code" href="https://github.com/Josafath/Simple-CRUD-project">Code</a>
             </div>
 
