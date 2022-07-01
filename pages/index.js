@@ -1,176 +1,292 @@
-
-import Link from 'next/link'
-import Head from 'next/head'
+import Head from "next/head";
+import {useEffect} from "react";
 
 export default function Home() {
+
+  useEffect(() => {
+    window.onload = function () {
+      var elements = document.getElementsByClassName("typewrite");
+      for (var i = 0; i < elements.length; i++) {
+        var toRotate = elements[i].getAttribute("data-type");
+        var period = elements[i].getAttribute("data-period");
+        if (toRotate) {
+          new TxtType(elements[i], JSON.parse(toRotate), period);
+        }
+      }
+      // INJECT CSS
+      var css = document.createElement("style");
+      css.type = "text/css";
+      css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
+      document.body.appendChild(css);
+    };
+  });
+
   return (
-    <div>
+    <>
       <Head>
-        <title>Josafath Cerón</title>
+        <title>Josafath Cerón's Website</title>
+        <meta name="description" content="Josafath's Portfolio" />
+        <meta name="author" content="Josafath Cerón" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
       </Head>
-      <section className='first_section'>
-    <div className='container'>
-      <div className="box">
-        <div className="title">
-          <div className="block"></div>
-          <h1 className="name">Josafath Cerón<span></span></h1>
-        </div>
 
-      <div className="role">
-        <div className="block"></div>
-        <p className="description">Software Developer</p>
-      </div>
-
-      <div className='social-media'>
-        <a href="https://www.facebook.com/josafath.cc/"><img src="/facebook.svg" alt="facebook image" /></a>
-        <a href="https://www.instagram.com/josafathcrn/"><img src="/instagram.svg" alt="instagram image"/></a>
-        <a href="https://twitter.com/jossa_x10"><img src="/tweter.svg" alt="twitter image" /></a>
-        <a href="https://github.com/Josafath"><img src="/github.svg" alt="github image" /></a>
-        <a href="https://www.linkedin.com/in/josafath-cer%C3%B3n-5b7a5a226/"><img src="/linkedin.svg" alt="linkedin image"/></a>
-        <a href="https://discord.com/channels/jossa_09"><img src="/discord.svg" alt="discord image" /></a>
-      </div>
+      <div className="title">
+        <h4>Hi there! I'm</h4>
+        <h3>Josafath Cerón</h3>
+        <h5>and I'm a developer</h5>
 
       </div>
-    </div>
-
-    <svg className="arrows">
-      <path className="a1" d="M0 0 L30 32 L60 0"></path>
-      <path className="a2" d="M0 20 L30 52 L60 20"></path>
-      <path className="a3" d="M0 40 L30 72 L60 40"></path>
-    </svg>
-    </section>
-    <section id="personal-projects">
-      
-      <h2 id="title-projects" style={{color: 'black'}}>Personal Projects</h2>
-        <div className="projects">
-
-          <div className="project">
-            <h2>Top Music with Spotify</h2>
-            <br/>
-            <svg height="15" width="fit-content">
-              <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(134, 96, 73)', strokeWidth:'6', borderRadius:'18px'}} />
-              Sorry, your browser does not support inline SVG.
-              </svg>
-              <p>
-                Web App using React and the Spotify API to show the user their top artist and songs of differents times.
-              </p>
+      <div className="arrow"></div>
+    
+      <section
+        style={{
+          marginTop: "10%",
+          height: "auto",
+          boxShadow: "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
+          width: "100%",
+          borderRadius: "4px",
+        }}
+      >
+        <div className="presentation">
+          <div>
+            <img src="/images/profile.png" alt="Josafath Cerón"></img>
+          </div>
+          <div style={{ padding: "2em" }}>
+            <a
+              style={{
+                textDecoration: "none",
+                color: "#000",
+                fontSize: "28px",
+              }}
+              className="typewrite"
+              data-period="2000"
+              data-type='[ "Hello World !"]'
+            >
+              <span className="wrap"></span>{" "}
+            </a>
+          </div>
+          <div>
+            <span
+              className="site-description"
+              style={{ color: "#000", fontSize: "20px" }}
+            >
+              I'm a passionate developer based in Mexico City who loves to build
+              things and solve problems. 
               
-            <div className="buttons">
-              <a id="go-website" href="https://jossify-joss.web.app/">Watch project</a>
-              <a id="code" href="https://github.com/Josafath/Spotify-React-App">Code</a>
-            </div>
-
-          </div>
-
-          <div className="project">
-
-            <h2>Attendance Management</h2>
-            <br/>
-            <svg height="15" width="fit-content">
-              <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(134, 96, 73)', strokeWidth:'6', borderRadius:'18px'}} />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-            <p>
-              Using OpenCV library I develop a program where a teacher can take attendance and download the list.
-              I also use sqlite3 for storing the students, this project was more for personal use.
+            </span>
+            <p
+              className="site-description"
+              style={{ color: "#000", fontSize: "16px" }}
+            >
+              I have always been fascinated by software's potentials as a developer. So I started by building multiple websites and web applications.
             </p>
-            <div className="buttons">
-              <a id="code" href="https://github.com/Josafath/attendance-management">Code</a>
-            </div>
-
-          </div>
-
-          <div className="project">
-
-            <h2>CRUD System</h2>
-            <br />
-            <svg height="15" width="fit-content">
-              <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(134, 96, 73)', strokeWidth:'6', borderRadius:'18px'}} />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-            <p>
-              Taking the curse from The Odin Project. The user can make any CRUD operation unless delete.
-              To delete the user has to have the password. 
-              For this project I use Nodejs, Express and MongoDB.
+            <p
+              style={{
+                color: "#818189",
+                margin: "24px auto 0",
+                textAlign: "center",
+                maxWidth: "500px",
+              }}
+            >
+              I am currently in my third year of university and I am looking for
+              an internship in a company.
             </p>
-            <div className="buttons">
-              <a id="go-website" href="https://jossify-crud.herokuapp.com/music">Watch project</a>
-              <a id="code" href="https://github.com/Josafath/Simple-CRUD-project">Code</a>
+          </div>
+          <div
+            className="skills"
+            style={{ display: "flex", flexFlow: "row wrap", alignItems:"center", justifyContent: "space-between", width:"70%" }}
+          >
+            <div>
+              <h2>Technologies</h2>
+              <ul className="check-list">
+                <li>HTML5, CSS3 & JavaScript</li>
+                <li>React</li>
+                <li>Redux</li>
+                <li>NodeJS</li>
+                <li>REST APIs </li>
+                <li>Python</li>
+                <li>Django</li>
+                <li>Java</li>
+                <li>PostgreSQL</li>
+                <li>MySQL</li>
+                <li>Git</li>
+              </ul>
             </div>
 
-          </div>
-
-          <div className="project">
-
-            <h2>Video Chat</h2>
-            <br/>
-            <svg height="15" width="fit-content">
-              <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(134, 96, 73)', strokeWidth:'6', borderRadius:'18px'}} />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-            <p>
-              Using socket.io, WebRTC API (no libraries), mongoDB for store users and rooms and Passport for authenticate users you can connect with someone creating a room or joining one of your friends. <br/>
-              Pd: I try to make this project like if it was a real product.
-            </p>
-            <div className="buttons">
-              <a id="go-website" href="https://study-partner.herokuapp.com/">Watch project</a>
-              <a id="code" href="https://github.com/Josafath/simple-video-chat">Code</a>
+            <div>
+              <h2>Skills</h2>
+              <ul className="check-list">
+                <li>Responsive Design</li>
+                <li>DOM manipulation</li>
+                <li>OOP</li>
+                <li>MVC</li>
+                <li>Unit Testing - Refactoring</li>
+                <li>Deployment</li>
+                <li>Relational Databases</li>
+                <li>Git Flow</li>
+                <li>Pair Programming</li>
+                <li>Wireframing</li>
+              </ul>
             </div>
-
           </div>
-
-          <div className="project">
-
-            <h2>Sorting Algorithms</h2>
-            <br />
-            <svg height="15" width="fit-content">
-              <line x1="0" y1="0" x2="300" y2="0" style={{stroke:'rgb(134, 96, 73)', strokeWidth:'6', borderRadius:'18px'}} />
-              Sorry, your browser does not support inline SVG.
-            </svg>
-            <p>
-              A little program where the user put a unlimited random numbers, then choose an algorithm and finally the program shows the data sorted.  <br/>
-              This was made only with Java, the intention was to learn the layouts and more about the Java language.
-            </p>
-            <div className="buttons">
-              <a id="code" href="https://github.com/Josafath/Sorting-Algorithms">Code</a>
-            </div>
-
-          </div>
-
-
-    
-
         </div>
-    </section>
-    
-    <section style={{backgroundColor: '#2B2D2D'}}>
-      <div id="future-ventures">
+      </section>
+      <section style={{marginTop: "5%"}}>
+        <p style={{ letterSpacing: "2px", marginLeft: "5%", fontSize: "24px", fontWeight: "300" }}>
+          My Projects
+        </p>
+        <div className="row1-container">
+          <div className="box box-down cyan">
+            <h2>Video Chat - JS</h2>
+            <p>
+              Using socket.io, WebRTC API (no libraries) and Passport I was able to understand the Peer2Peer Connection.
+            </p>
+            <a
+              style={{ color: "black" }}
+              href="https://study-partner.herokuapp.com/"
+            >
+              See Live
+            </a>
+          </div>
+
+          <div className="box red">
+            <h2>Attendance Management - Python </h2>
+            <p>
+              Using Facial Recognition with OpenCV take attendance for a school.
+            </p>
+            <a
+              style={{ color: "black" }}
+              href="https://github.com/Josafath/attendance-management.git"
+            >
+              Source
+            </a>
+            
+          </div>
+
+          <div className="box box-down blue">
+            <h2>Sorting Algorithms GUI -  Java</h2>
+            <p>GUI where each sorting algorithm is implemented</p>
+            <a
+              style={{ color: "black" }}
+              href="https://github.com/Josafath/Sorting-Algorithms.git"
+            >
+              Source
+            </a>
+            
+          </div>
+        </div>
+        <div className="row2-container">
+          <div className="box orange">
+            <h2>CRUD System - JS</h2>
+            <p>Simple CRUD program using ExpressJS and MongoDB</p>
+            <a
+              style={{ color: "black" }}
+              href="https://jossify-crud.herokuapp.com/music/"
+            >
+              See Live
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section style={{
+          marginTop: "10%",
+          height: "auto",
+          width: "100%",
+          borderRadius: "4px",
+          backgroundColor: "#1a1111",
+          display:"flex",
+          flexFlow: "column nowrap",
+          alignContent:"center",
+          justifyContent:"center",
+          padding: "2em 0",
+        }}>
+        <p className="section-header">Contact Me</p>
       
-        <div className="ventures">
-          <h2 id="future-ventures-h2">Futures Ventures about Tech (Teach Myself in 2022): </h2>
-          <ul>
-            <li>Blockchain</li>
-            <li>Data Science</li>
-            <li>Scalable Distributed Systems (infrastructure, networks, microservices)</li>
+        <div className="direct-social-container" style={{textAlign:"center"}}>
+          <ul className="contact-list">
+            <li className="list-item">
+            <i class="fa fa-map-marker fa-2x"><span className="contact-text place" style={{paddingLeft: "1em"}}>Mexico City</span></i>
+            </li>
+            <li className="list-item">
+            <i className="fa fa-envelope fa-2x"><span className="contact-text gmail"><a href="mailto:josafathcrn@gmail.com" title="Send me an email" style={{color:"white"}}>josafathcrn@gmail.com</a></span></i>
+            </li>
+
           </ul>
+
+          <hr />
+          <ul className="social-media-list">
+            <li>
+              <a href="https://github.com/Josafath" className="contact-icon">
+                <i className="fa fa-github" aria-hidden="true"></i>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/in/josafath-cer%C3%B3n-5b7a5a226/" className="contact-icon">
+              <i className="fa fa-linkedin" aria-hidden="true"></i>
+              </a>
+            </li>
+
+            <li>
+              <a href="https://www.instagram.com/josafathcrn/" className="contact-icon">
+                <i className="fa fa-instagram" aria-hidden="true"></i>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.facebook.com/josafath.cc/" className="contact-icon">
+                <i className="fa fa-facebook" aria-hidden="true"></i>
+              </a>
+            </li>
+          </ul>
+          <hr />
+          <div className="copyright">&copy; Josafath Cerón </div>
         </div>
 
-        <div className="ventures">
-          <h2 id="future-ventures-h2">Personal Goals in 2022: </h2>
-          <ul>
-            <li>Read 14 books</li>
-            <li>Meditate</li>
-            <li>Learn Italian/French</li>
-            <li>Learn to dance</li>
-          </ul>
 
-       </div>
-      </div>
-    </section>
-
-    <section className='contact-section'>
-      <Link href='/contact' passHref>Contact Me</Link>
-    </section>
-  </div>
-  )
+      </section>
+    </>
+  );
 }
+
+var TxtType = function (el, toRotate, period) {
+  this.toRotate = toRotate;
+  this.el = el;
+  this.loopNum = 0;
+  this.period = parseInt(period, 10) || 2000;
+  this.txt = "";
+  this.tick();
+  this.isDeleting = false;
+};
+
+TxtType.prototype.tick = function () {
+  var i = this.loopNum % this.toRotate.length;
+  var fullTxt = this.toRotate[i];
+
+  if (this.isDeleting) {
+    this.txt = fullTxt.substring(0, this.txt.length - 1);
+  } else {
+    this.txt = fullTxt.substring(0, this.txt.length + 1);
+  }
+
+  this.el.innerHTML = '<span class="wrap">' + this.txt + "</span>";
+
+  var that = this;
+  var delta = 200 - Math.random() * 100;
+
+  if (this.isDeleting) {
+    delta /= 2;
+  }
+
+  if (!this.isDeleting && this.txt === fullTxt) {
+    delta = this.period;
+    this.isDeleting = true;
+  } else if (this.isDeleting && this.txt === "") {
+    this.isDeleting = false;
+    this.loopNum++;
+    delta = 500;
+  }
+
+  setTimeout(function () {
+    that.tick();
+  }, delta);
+};

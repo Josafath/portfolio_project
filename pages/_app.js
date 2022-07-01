@@ -1,6 +1,5 @@
 import '../styles/style.css'
-import '../styles/styles1.css'
-import '../styles/style_contact.css'
+import '../styles/style_404.css'
 function MyApp({ Component, pageProps }) {
   return (
         <Component {...pageProps} />
