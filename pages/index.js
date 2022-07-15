@@ -42,7 +42,7 @@ export default function Home() {
         style={{
           marginTop: "10%",
           height: "auto",
-          boxShadow: "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
+          boxShadow: "rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
           width: "100%",
           borderRadius: "4px",
         }}
@@ -132,7 +132,7 @@ export default function Home() {
         </div>
       </section>
       <section style={{marginTop: "5%"}}>
-        <p style={{ letterSpacing: "2px", marginLeft: "5%", fontSize: "24px", fontWeight: "300" }}>
+        <p style={{ letterSpacing: "2px", textAlign: "center", fontSize: "24px", fontWeight: "300" }}>
           My Projects
         </p>
         <div className="row1-container">
@@ -214,7 +214,7 @@ export default function Home() {
 
           </ul>
 
-          <hr />
+          
           <ul className="social-media-list">
             <li>
               <a href="https://github.com/Josafath" className="contact-icon">
@@ -238,7 +238,6 @@ export default function Home() {
               </a>
             </li>
           </ul>
-          <hr />
           <div className="copyright">&copy; Josafath Cerón </div>
         </div>
 
