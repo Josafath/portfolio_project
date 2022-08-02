@@ -222,7 +222,7 @@ export default function Home() {
               </a>
             </li>
             <li>
-              <a href="https://www.linkedin.com/in/josafath-cer%C3%B3n-5b7a5a226/" className="contact-icon">
+              <a href="https://www.linkedin.com/in/josafath-ceron/" className="contact-icon">
               <i className="fa fa-linkedin" aria-hidden="true"></i>
               </a>
             </li>
