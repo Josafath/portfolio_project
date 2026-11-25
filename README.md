@@ -6,7 +6,7 @@ so projects, the story timeline, services and contact messages are all managed f
 | Folder | What it is | Status |
 |---|---|---|
 | [`backend/`](backend) | Django + Django REST Framework API, PostgreSQL in production | Done |
-| `frontend/` | Next.js site with particles, scroll animations and light/dark mode | Next |
+| [`frontend/`](frontend) | Next.js site with particles, scroll animations and light/dark mode, in Spanish and English | Done |
 
 ## API
 
@@ -23,6 +23,7 @@ Responses are cached by Vercel's CDN for 5 minutes, so an edit in the admin can 
 | POST | `/api/messages/` | Contact form: `name`, `email`, `message`, optional `service` (id) |
 
 The contact endpoint only accepts POST, so messages can't be read through the API: they are read in the admin.
+Its validation errors come in the request's `Accept-Language` (`es` or `en`).
 It allows 5 messages per hour per IP, and it has a honeypot: a hidden `website` field that the frontend
 must leave empty. Messages with it filled get a normal `201` but are not saved.
 
@@ -49,7 +50,34 @@ python manage.py runserver
 
 Run the tests with `python manage.py test`.
 
+Then, in another terminal, the frontend (Node.js 24 or newer). It needs the API running, even to build:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local      # NEXT_PUBLIC_API_URL=http://localhost:8000
+npm run dev
+```
+
+- Site: http://localhost:3000 (redirects to `/es` or `/en` from the browser's language)
+- Checks: `npx tsc --noEmit`, `npm run lint`, `npm run build`
+
+### How the frontend is built
+
+- **Next.js 16** with Cache Components: API content is cached with `'use cache'` + `cacheLife("minutes")`,
+  so pages are static and refresh a few minutes after an edit in the admin.
+- **Particles** (`src/components/particles/engine.ts`): a canvas engine with no dependencies. Sections declare what
+  the particles form with `data-scene` attributes, and the engine picks the scene from the scroll position:
+  the name in the hero, each milestone's year in the story, the newest version on a project page.
+- **Motion** for scroll-linked animation (pinned horizontal gallery, words lighting up), **next-themes** for
+  light/dark mode, and the View Transitions API for the circular theme switch and the project title morph.
+- Everything respects `prefers-reduced-motion`.
+
 ## Deploy on Vercel
+
+Two Vercel projects, both connected to this repo.
+
+### Backend
 
 Vercel detects Django from `manage.py`, runs `collectstatic` on every build (so the admin's CSS works)
 and reads the Python version from `backend/.python-version`. No `vercel.json` is needed.
@@ -77,3 +105,13 @@ and reads the Python version from `backend/.python-version`. No `vercel.json` is
 
 `manage.py check --deploy` warns about `SECURE_HSTS_SECONDS` and `SECURE_SSL_REDIRECT`.
 Both are handled by Vercel, which only serves HTTPS and sends HSTS on its domains.
+
+### Frontend
+
+Deploy the backend first: the frontend reads the API while it builds.
+
+1. **Project.** The existing portfolio project (it keeps the domain). In *Settings → Build and Deployment*:
+   Root Directory `frontend`, framework Next.js, Node.js 26.x. Remove the `exit 0` Ignored Build Step if one was set.
+2. **Environment variable.** `NEXT_PUBLIC_API_URL` = the backend's URL, e.g. `https://portfolio-api.vercel.app`.
+3. **Back in the backend project**, set `DJANGO_CORS_ALLOWED_ORIGINS` to the frontend's URL (with `https://`),
+   so the contact form can post from the browser.

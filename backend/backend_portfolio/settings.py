@@ -69,6 +69,8 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Validation errors follow the request's Accept-Language (the frontend sends the page language)
+    "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -134,7 +136,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = "es-mx"
+LANGUAGE_CODE = "es"
+
+LANGUAGES = [
+    ("es", "Español"),
+    ("en", "English"),
+]
 
 TIME_ZONE = "America/Mexico_City"
 
