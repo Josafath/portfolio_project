@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Django
+*.sqlite3
+backend/staticfiles/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store

@@ -1,34 +1,117 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Portfolio
 
-## Getting Started
+My developer portfolio. v1 (2022) was a Next.js site; v2 adds a Django backend that holds the content,
+so projects, the story timeline, services and contact messages are all managed from the Django admin.
 
-First, run the development server:
+| Folder | What it is | Status |
+|---|---|---|
+| [`backend/`](backend) | Django + Django REST Framework API, PostgreSQL in production | Done |
+| [`frontend/`](frontend) | Next.js site with particles, scroll animations and light/dark mode, in Spanish and English | Done |
+
+## API
+
+Every content endpoint takes `?lang=es` (default) or `?lang=en` and returns only that language.
+Responses are cached by Vercel's CDN for 5 minutes, so an edit in the admin can take that long to appear.
+
+| Method | Path | Returns |
+|---|---|---|
+| GET | `/api/projects/` | Published projects, with their versions (v1, v2…) and the before/after table |
+| GET | `/api/projects/<slug>/` | One project |
+| GET | `/api/milestones/` | The story timeline. `shape` is the short text the particles form (`2022`, `v2`) |
+| GET | `/api/services/` | What can be hired, with the slugs of projects that prove it |
+| GET | `/api/socials/` | Social links. `?category=dev` or `?category=personal` for one group |
+| POST | `/api/messages/` | Contact form: `name`, `email`, `message`, optional `service` (id) |
+
+The contact endpoint only accepts POST, so messages can't be read through the API: they are read in the admin.
+Its validation errors come in the request's `Accept-Language` (`es` or `en`).
+It allows 5 messages per hour per IP, and it has a honeypot: a hidden `website` field that the frontend
+must leave empty. Messages with it filled get a normal `201` but are not saved.
+
+## Run it locally
+
+You need Python 3.12 or newer.
 
 ```bash
-npm run dev
-# or
-yarn dev
+cd backend
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env            # DJANGO_DEBUG=1, SQLite
+set -a && . ./.env && set +a
+
+python manage.py migrate         # creates the tables and loads the initial content
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- API: http://localhost:8000/api/projects/
+- Admin: http://localhost:8000/admin/
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+Run the tests with `python manage.py test`.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+Then, in another terminal, the frontend (Node.js 24 or newer). It needs the API running, even to build:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```bash
+cd frontend
+npm install
+cp .env.example .env.local      # NEXT_PUBLIC_API_URL=http://localhost:8000
+npm run dev
+```
 
-## Learn More
+- Site: http://localhost:3000 (redirects to `/es` or `/en` from the browser's language)
+- Checks: `npx tsc --noEmit`, `npm run lint`, `npm run build`
 
-To learn more about Next.js, take a look at the following resources:
+### How the frontend is built
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **Next.js 16** with Cache Components: API content is cached with `'use cache'` + `cacheLife("minutes")`,
+  so pages are static and refresh a few minutes after an edit in the admin.
+- **Particles** (`src/components/particles/engine.ts`): a canvas engine with no dependencies. Sections declare what
+  the particles form with `data-scene` attributes, and the engine picks the scene from the scroll position:
+  the name in the hero, each milestone's year in the story, the newest version on a project page.
+- **Motion** for scroll-linked animation (pinned horizontal gallery, words lighting up), **next-themes** for
+  light/dark mode, and the View Transitions API for the circular theme switch and the project title morph.
+- Everything respects `prefers-reduced-motion`.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Two Vercel projects, both connected to this repo.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Backend
+
+Vercel detects Django from `manage.py`, runs `collectstatic` on every build (so the admin's CSS works)
+and reads the Python version from `backend/.python-version`. No `vercel.json` is needed.
+
+1. **Database.** In the Vercel dashboard, go to *Storage* and create a **Neon** Postgres database. Connect it to
+   the project. This adds `DATABASE_URL`.
+2. **Project.** Import this repo and set **Root Directory** to `backend`.
+3. **Environment variables** (*Settings → Environment Variables*):
+   - `DJANGO_SECRET_KEY`: a new random key, made with
+     `python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"`
+   - `DJANGO_CORS_ALLOWED_ORIGINS`: the frontend's URL, once it exists
+   - `DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS`: only if you add a custom domain such as
+     `api.example.com`. The `*.vercel.app` hosts are added automatically.
+4. **Migrations.** Vercel doesn't run them. Run them from your machine against the production database
+   whenever a model changes:
+
+   ```bash
+   cd backend
+   DATABASE_URL="<Neon connection string>" DJANGO_DEBUG=1 python manage.py migrate
+   DATABASE_URL="<Neon connection string>" DJANGO_DEBUG=1 python manage.py createsuperuser
+   ```
+
+   Running them by hand is deliberate: preview deployments of unmerged branches share the same database,
+   so migrating on every build could change production from a branch that never gets merged.
+
+`manage.py check --deploy` warns about `SECURE_HSTS_SECONDS` and `SECURE_SSL_REDIRECT`.
+Both are handled by Vercel, which only serves HTTPS and sends HSTS on its domains.
+
+### Frontend
+
+Deploy the backend first: the frontend reads the API while it builds.
+
+1. **Project.** The existing portfolio project (it keeps the domain). In *Settings → Build and Deployment*:
+   Root Directory `frontend`, framework Next.js, Node.js 26.x. Remove the `exit 0` Ignored Build Step if one was set.
+2. **Environment variable.** `NEXT_PUBLIC_API_URL` = the backend's URL, e.g. `https://portfolio-api.vercel.app`.
+3. **Back in the backend project**, set `DJANGO_CORS_ALLOWED_ORIGINS` to the frontend's URL (with `https://`),
+   so the contact form can post from the browser.

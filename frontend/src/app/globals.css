@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+/* next-themes sets data-theme="light" | "dark" on <html> */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #f2f4f6;
+  --surface: #ffffffd9;
+  --fg: #11161d;
+  --muted: #566170;
+  --line: #d4dae2;
+  --accent: #a35400;
+  --accent-ink: #ffffff;
+  --particle: #18212c;
+  --particle-hot: #d07000;
+  --shadow: 0 1px 2px #11161d0f, 0 12px 32px #11161d12;
+  --header-h: 64px;
+}
+
+[data-theme="dark"] {
+  --bg: #0b0f14;
+  --surface: #131a22d9;
+  --fg: #e8ecf1;
+  --muted: #93a0b0;
+  --line: #222b36;
+  --accent: #f5b94a;
+  --accent-ink: #1a1204;
+  --particle: #dbe4ee;
+  --particle-hot: #f5b94a;
+  --shadow: 0 1px 2px #0006, 0 14px 36px #0006;
+  color-scheme: dark;
+}
+
+/* Before next-themes runs (or without JS), follow the system */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #0b0f14;
+    --surface: #131a22d9;
+    --fg: #e8ecf1;
+    --muted: #93a0b0;
+    --line: #222b36;
+    --accent: #f5b94a;
+    --accent-ink: #1a1204;
+    --particle: #dbe4ee;
+    --particle-hot: #f5b94a;
+    --shadow: 0 1px 2px #0006, 0 14px 36px #0006;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --shadow-card: var(--shadow);
+  --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--font-instrument), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, Menlo, monospace;
+}
+
+@utility wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+@utility tag {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--fg);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: clip;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Theme toggle: the new theme grows as a circle from the button (see ThemeToggle) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* The particle name replaces the real heading once the canvas is ready */
+.fx-ready .particle-text {
+  color: transparent;
+}
+
+/* Story: only the chapter whose year the particles are forming is fully visible */
+.chapter {
+  transition: opacity 0.5s, translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.fx .chapter:not([data-active]) {
+  opacity: 0.25;
+  translate: 0 18px;
+}
+.stage-caption {
+  transition: opacity 0.3s;
+}
+.stage-caption:not([data-active]) {
+  opacity: 0;
+}
+
+.caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: -0.12em;
+  background: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+
+.pulse-dot {
+  animation: pulse 2.4s infinite;
+}
+
+.cue-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--accent);
+  animation: drop 1.8s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+}
+
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+.commit::before {
+  content: "$ git commit -m ";
+  color: var(--muted);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+@keyframes drop {
+  from {
+    transform: translateY(-14px);
+  }
+  to {
+    transform: translateY(36px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
