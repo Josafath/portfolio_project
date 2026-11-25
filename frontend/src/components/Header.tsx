@@ -16,7 +16,7 @@ export function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/60 bg-bg/70 backdrop-blur-md">
       <div className="wrap flex h-(--header-h) items-center justify-between gap-4">
         <Link href={`/${lang}`} className="font-mono text-[0.95rem] font-medium text-fg">
-          josafath<span className="text-accent">.</span>dev
+          jossa<span className="text-accent">_</span>dev
         </Link>
         <nav aria-label={dict.nav.projects} className="flex items-center gap-0.5">
           {links.map((link) => (
