@@ -1,4 +1,8 @@
+from urllib.parse import urlencode
+
+from django.conf import settings
 from django.contrib import admin
+from django.utils.html import format_html
 
 from .models import ContactMessage, Improvement, Milestone, Project, ProjectVersion, Service, SocialLink, Technology
 
@@ -54,14 +58,27 @@ class SocialLinkAdmin(admin.ModelAdmin):
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ("name", "email", "service", "created_at", "is_read")
+    list_display = ("name", "email", "service", "created_at", "is_read", "reply")
     list_filter = ("is_read", "service")
     search_fields = ("name", "email", "message")
-    readonly_fields = ("name", "email", "service", "message", "created_at")
+    readonly_fields = ("reply", "name", "email", "service", "message", "created_at")
     actions = ("mark_as_read",)
 
     def has_add_permission(self, request):
         return False
+
+    @admin.display(description="Responder")
+    def reply(self, obj):
+        subject = f"Re: {obj.service.title_es}" if obj.service else "Re: tu mensaje en mi portafolio"
+        quoted = "\n".join(f"> {line}" for line in obj.message.splitlines())
+        body = f"Hola {obj.name},\n\n\n\n{quoted}"
+        # Gmail's compose window in the configured account; any mail app otherwise
+        if settings.CONTACT_REPLY_GMAIL:
+            query = {"view": "cm", "fs": "1", "authuser": settings.CONTACT_REPLY_GMAIL, "to": obj.email, "su": subject, "body": body}
+            url = f"https://mail.google.com/mail/?{urlencode(query)}"
+        else:
+            url = f"mailto:{obj.email}?{urlencode({'subject': subject, 'body': body})}"
+        return format_html('<a class="button" href="{}" target="_blank" rel="noopener">Responder ↗</a>', url)
 
     @admin.action(description="Marcar como leídos")
     def mark_as_read(self, request, queryset):

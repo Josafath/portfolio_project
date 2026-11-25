@@ -1,4 +1,10 @@
+import re
+from html import unescape
+from urllib.parse import parse_qs, urlparse
+
+from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.test import override_settings
 from rest_framework.test import APITestCase
 
 from .models import ContactMessage, Milestone, Project, Service, SocialLink
@@ -123,3 +129,28 @@ class SeedMigrationTests(APITestCase):
     def test_personal_instagram_is_separate_from_dev_links(self):
         link = SocialLink.objects.get(handle="@josafath.crn")
         self.assertEqual(link.category, SocialLink.Category.PERSONAL)
+
+
+class ContactMessageAdminTests(APITestCase):
+    def setUp(self):
+        user = User.objects.create_superuser("admin", password="test-only-password")
+        self.client.force_login(user)
+        service = Service.objects.get(title_en="Full web apps")
+        self.message = ContactMessage.objects.create(
+            name="Ana", email="ana@example.com", message="Tengo una idea.\nEs una app.", service=service
+        )
+
+    @override_settings(CONTACT_REPLY_GMAIL="yo@gmail.com")
+    def test_reply_opens_gmail_in_the_configured_account(self):
+        html = self.client.get(f"/admin/portfolio/contactmessage/{self.message.pk}/change/").content.decode()
+        reply_url = unescape(re.search(r'href="(https://mail\.google\.com/[^"]+)"', html).group(1))
+        query = parse_qs(urlparse(reply_url).query)
+        self.assertEqual(query["authuser"], ["yo@gmail.com"])
+        self.assertEqual(query["to"], ["ana@example.com"])
+        self.assertEqual(query["su"], ["Re: Apps web completas"])
+        self.assertIn("> Tengo una idea.\n> Es una app.", query["body"][0])
+
+    @override_settings(CONTACT_REPLY_GMAIL="")
+    def test_reply_falls_back_to_mailto(self):
+        html = self.client.get("/admin/portfolio/contactmessage/").content.decode()
+        self.assertIn('href="mailto:ana@example.com?subject=', html)

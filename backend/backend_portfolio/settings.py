@@ -79,6 +79,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# The Gmail account the admin's "Responder" button writes from. Empty opens the default mail app.
+CONTACT_REPLY_GMAIL = os.environ.get("DJANGO_CONTACT_REPLY_GMAIL", "")
+
 CORS_ALLOWED_ORIGINS = env_list("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 # Optional, for the frontend's preview deployments, e.g. ^https://portfolio-[\w-]+\.vercel\.app$
 CORS_ALLOWED_ORIGIN_REGEXES = env_list("DJANGO_CORS_ALLOWED_ORIGIN_REGEXES")
