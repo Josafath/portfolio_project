@@ -113,6 +113,9 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+# Neon's pooled connection (PgBouncer, transaction mode) can't keep server-side cursors open
+if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 
 # Password validation
