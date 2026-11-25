@@ -12,7 +12,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
 class MessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Messages
-        fields = ('id','name','email','messages')
+        fields = ('id','name','email','message')
 
 
 class TechnologiesSerializer(serializers.ModelSerializer):

@@ -8,7 +8,8 @@ class ListaProyectos(generics.ListAPIView):
     queryset = Proyectos.objects.all()
     serializer_class = ProyectoSerializer
 
-class ListaMensajes(generics.ListAPIView):
+# Solo escritura: los mensajes de contacto se leen desde el admin, no desde la API pública
+class CrearMensajes(generics.CreateAPIView):
     queryset = Mensajes.objects.all()
     serializer_class = MensajesSerializer
 
@@ -21,10 +22,6 @@ class ListaTecnologias(generics.ListAPIView):
 class ProyectosDetalles(generics.RetrieveAPIView):
     queryset = Proyectos.objects.all()
     serializer_class = ProyectoSerializer
-
-class MensajesDetalles(generics.RetrieveAPIView):
-    queryset = Mensajes.objects.all()
-    serializer_class = MensajesSerializer
 
 class TecnologiasDetalles(generics.RetrieveAPIView):
     queryset = Tecnologias.objects.all()
