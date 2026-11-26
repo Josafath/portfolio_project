@@ -72,7 +72,7 @@ class ContentApiTests(APITestCase):
         personal = self.client.get("/api/socials/?category=personal").json()
         self.assertEqual([s["handle"] for s in personal], ["@josafath.crn"])
         dev = self.client.get("/api/socials/?category=dev").json()
-        self.assertEqual([s["handle"] for s in dev], ["Josafath", "@jossa_dev", "josafath-ceron"])
+        self.assertEqual([s["handle"] for s in dev], ["Josafath", "@josafath.dev", "josafath-ceron"])
 
     def test_unknown_social_category_returns_everything(self):
         self.assertEqual(len(self.client.get("/api/socials/?category=nope").json()), 4)

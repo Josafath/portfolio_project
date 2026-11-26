@@ -7,6 +7,7 @@ import { ThemeToggle } from "./ThemeToggle";
 export function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const links = [
     { href: `/${lang}#story`, label: dict.nav.story, wide: true },
+    { href: `/${lang}#experience`, label: dict.nav.experience, wide: true },
     { href: `/${lang}#projects`, label: dict.nav.projects, wide: false },
     { href: `/${lang}#services`, label: dict.nav.services, wide: true },
     { href: `/${lang}#contact`, label: dict.nav.contact, wide: false },
@@ -16,7 +17,7 @@ export function Header({ lang, dict }: { lang: Locale; dict: Dictionary }) {
     <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-line/60 bg-bg/70 backdrop-blur-md">
       <div className="wrap flex h-(--header-h) items-center justify-between gap-4">
         <Link href={`/${lang}`} className="font-mono text-[0.95rem] font-medium text-fg">
-          jossa<span className="text-accent">_</span>dev
+          josafath<span className="text-accent">.</span>dev
         </Link>
         <nav aria-label={dict.nav.projects} className="flex items-center gap-0.5">
           {links.map((link) => (
