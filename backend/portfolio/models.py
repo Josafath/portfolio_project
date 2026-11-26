@@ -195,3 +195,13 @@ class ContactMessage(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} <{self.email}>"
+
+
+class FailedLogin(models.Model):
+    """A wrong password in the admin login. Kept in the database so every Vercel instance sees the same count."""
+
+    ip = models.GenericIPAddressField()
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    def __str__(self) -> str:
+        return f"{self.ip} · {self.created_at:%Y-%m-%d %H:%M}"

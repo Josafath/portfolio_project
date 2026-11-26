@@ -1,13 +1,15 @@
 import re
+from datetime import timedelta
 from html import unescape
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import override_settings
+from django.test import TestCase, override_settings
+from django.utils import timezone
 from rest_framework.test import APITestCase
 
-from .models import ContactMessage, Experience, Milestone, Project, Service, SocialLink, Technology
+from .models import ContactMessage, Experience, FailedLogin, Milestone, Project, Service, SocialLink, Technology
 
 
 class ContentApiTests(APITestCase):
@@ -228,3 +230,39 @@ class ContactMessageAdminTests(APITestCase):
         self.message.save()
         html = unescape(self.client.get("/admin/portfolio/contactmessage/").content.decode())
         self.assertIn("subject=Re%3A+oferta+de+trabajo", html)
+
+
+class AdminLoginThrottleTests(TestCase):
+    def setUp(self):
+        User.objects.create_superuser("admin", password="test-only-password")
+
+    def login(self, password, ip="203.0.113.7"):
+        return self.client.post(
+            "/admin/login/?next=/admin/",
+            {"username": "admin", "password": password},
+            REMOTE_ADDR=ip,
+        )
+
+    def test_blocks_the_ip_after_five_wrong_passwords(self):
+        for _ in range(5):
+            self.assertContains(self.login("wrong"), "errornote")
+        response = self.login("test-only-password")
+        self.assertContains(response, "Demasiados intentos fallidos")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_other_ips_can_still_log_in(self):
+        for _ in range(5):
+            self.login("wrong")
+        self.assertRedirects(self.login("test-only-password", ip="198.51.100.4"), "/admin/")
+
+    def test_attempts_expire_after_the_window(self):
+        for _ in range(5):
+            self.login("wrong")
+        FailedLogin.objects.update(created_at=timezone.now() - timedelta(minutes=16))
+        self.assertRedirects(self.login("test-only-password"), "/admin/")
+
+    def test_successful_login_clears_the_count(self):
+        for _ in range(4):
+            self.login("wrong")
+        self.assertRedirects(self.login("test-only-password"), "/admin/")
+        self.assertFalse(FailedLogin.objects.exists())

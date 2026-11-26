@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.html import format_html
 
+from .admin_login import ThrottledAdminAuthenticationForm
 from .models import (
     ContactMessage,
     Experience,
@@ -18,6 +19,7 @@ from .models import (
 
 admin.site.site_header = "Portafolio · admin"
 admin.site.site_title = "Portafolio"
+admin.site.login_form = ThrottledAdminAuthenticationForm
 
 
 class ProjectVersionInline(admin.TabularInline):
