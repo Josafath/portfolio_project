@@ -109,9 +109,10 @@ WSGI_APPLICATION = "backend_portfolio.wsgi.application"
 
 # Database: Postgres on Vercel through DATABASE_URL, SQLite on your machine
 
+# `or`, not a default: .env.example leaves DATABASE_URL set but empty
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    "default": dj_database_url.parse(
+        os.environ.get("DATABASE_URL") or f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=60,
         conn_health_checks=True,
     )
