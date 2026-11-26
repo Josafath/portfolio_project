@@ -8,6 +8,7 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { alternatesFor, SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const display = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], weight: ["400", "600", "800"] });
@@ -23,9 +24,21 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   if (!hasLocale(lang)) return {};
   const dict = getDictionary(lang);
   return {
+    metadataBase: new URL(SITE_URL),
     title: { default: dict.meta.title, template: `%s · Josafath Cerón` },
     description: dict.meta.description,
-    alternates: { languages: { es: "/es", en: "/en" } },
+    alternates: alternatesFor(lang),
+    openGraph: {
+      type: "website",
+      siteName: "Josafath Cerón",
+      locale: lang === "es" ? "es_MX" : "en_US",
+      url: `/${lang}`,
+      title: dict.meta.title,
+      description: dict.meta.description,
+    },
+    twitter: { card: "summary_large_image" },
+    // The HTML-tag code Google Search Console gives when adding the site as a property
+    verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   };
 }
 

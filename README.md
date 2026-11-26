@@ -117,5 +117,8 @@ Deploy the backend first: the frontend reads the API while it builds.
 1. **Project.** The existing portfolio project (it keeps the domain). In *Settings → Build and Deployment*:
    Root Directory `frontend`, framework Next.js, Node.js 26.x. Remove the `exit 0` Ignored Build Step if one was set.
 2. **Environment variable.** `NEXT_PUBLIC_API_URL` = the backend's URL, e.g. `https://portfolio-api.vercel.app`.
+   Optional: `NEXT_PUBLIC_SITE_URL` (defaults to `https://josafath-dev.vercel.app`), the address used for canonical URLs,
+   `sitemap.xml`, `robots.txt` and link previews; and `GOOGLE_SITE_VERIFICATION`, the code Google Search Console
+   gives with the *HTML tag* method.
 3. **Back in the backend project**, set `DJANGO_CORS_ALLOWED_ORIGINS` to the frontend's URL (with `https://`),
    so the contact form can post from the browser.

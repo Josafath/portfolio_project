@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { lang as rootLang } from "next/root-params";
@@ -7,6 +7,7 @@ import { ProjectLinks, repoPath } from "@/components/project-utils";
 import { hasLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { getProject, getProjects } from "@/lib/api";
+import { alternatesFor } from "@/lib/site";
 
 export async function generateStaticParams() {
   const lang = await rootLang();
@@ -15,10 +16,21 @@ export async function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
 }
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/projects/[slug]">): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: PageProps<"/[lang]/projects/[slug]">,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const { lang, slug } = await params;
   const project = hasLocale(lang) ? await getProject(lang, slug) : null;
-  return project ? { title: project.name, description: project.tagline } : {};
+  if (!project || !hasLocale(lang)) return {};
+  const path = `/projects/${slug}`;
+  return {
+    title: project.name,
+    description: project.tagline,
+    alternates: alternatesFor(lang, path),
+    // Keeps the layout's site name, locale and preview image
+    openGraph: { ...(await parent).openGraph, title: project.name, description: project.tagline, url: `/${lang}${path}` },
+  };
 }
 
 export default async function ProjectPage({ params }: PageProps<"/[lang]/projects/[slug]">) {
