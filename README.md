@@ -18,9 +18,11 @@ Responses are cached by Vercel's CDN for 5 minutes, so an edit in the admin can 
 | GET | `/api/projects/` | Published projects, with their versions (v1, v2…) and the before/after table |
 | GET | `/api/projects/<slug>/` | One project |
 | GET | `/api/milestones/` | The story timeline. `shape` is the short text the particles form (`2022`, `v2`) |
+| GET | `/api/experience/` | Jobs, newest first. `highlights` is a list (one line per achievement in the admin) |
+| GET | `/api/technologies/` | The stack: technologies with a `category`, and the slugs of the projects that use each one |
 | GET | `/api/services/` | What can be hired, with the slugs of projects that prove it |
 | GET | `/api/socials/` | Social links. `?category=dev` or `?category=personal` for one group |
-| POST | `/api/messages/` | Contact form: `name`, `email`, `message`, optional `service` (id) |
+| POST | `/api/messages/` | Contact form: `name`, `email`, `message`, `kind` (`project` by default, or `job`), optional `service` (id, ignored for `job`) |
 
 The contact endpoint only accepts POST, so messages can't be read through the API: they are read in the admin.
 Its validation errors come in the request's `Accept-Language` (`es` or `en`).
@@ -72,6 +74,8 @@ npm run dev
 - **Motion** for scroll-linked animation (pinned horizontal gallery, words lighting up), **next-themes** for
   light/dark mode, and the View Transitions API for the circular theme switch and the project title morph.
 - Everything respects `prefers-reduced-motion`.
+- **CV:** drop `josafath-ceron-cv-es.pdf` and/or `josafath-ceron-cv-en.pdf` in `public/cv/` and the hero shows
+  a *Download CV* button (checked at build time in `next.config.ts`). Without one it links to the experience section.
 
 ## Deploy on Vercel
 

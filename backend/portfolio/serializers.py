@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import ContactMessage, Improvement, Milestone, Project, ProjectVersion, Service, SocialLink
+from .models import ContactMessage, Experience, Improvement, Milestone, Project, ProjectVersion, Service, SocialLink, Technology
 
 LANGUAGES = ("es", "en")
 DEFAULT_LANGUAGE = "es"
@@ -60,6 +60,32 @@ class MilestoneSerializer(serializers.ModelSerializer):
         fields = ("year", "date", "shape", "title", "body", "repo", "commit_hash", "commit_message", "technologies")
 
 
+class ExperienceSerializer(serializers.ModelSerializer):
+    company = TranslatedField()
+    role = TranslatedField()
+    highlights = serializers.SerializerMethodField()
+    technologies = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+
+    class Meta:
+        model = Experience
+        fields = ("company", "role", "start", "end", "highlights", "technologies")
+
+    def get_highlights(self, experience):
+        lang = self.context.get("lang", DEFAULT_LANGUAGE)
+        text = getattr(experience, f"highlights_{lang}")
+        return [line.strip() for line in text.splitlines() if line.strip()]
+
+
+class TechnologySerializer(serializers.ModelSerializer):
+    """A technology of the stack, with the published projects that use it."""
+
+    projects = serializers.SlugRelatedField(many=True, read_only=True, slug_field="slug")
+
+    class Meta:
+        model = Technology
+        fields = ("name", "category", "projects")
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     title = TranslatedField()
     description = TranslatedField()
@@ -82,5 +108,11 @@ class ContactMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContactMessage
-        fields = ("name", "email", "service", "message", "website")
+        fields = ("kind", "name", "email", "service", "message", "website")
         extra_kwargs = {"service": {"required": False, "allow_null": True}}
+
+    def validate(self, data):
+        # A job offer isn't about one of the services
+        if data.get("kind") == ContactMessage.Kind.JOB:
+            data["service"] = None
+        return data

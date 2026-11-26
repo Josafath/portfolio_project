@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from .models import ContactMessage, Milestone, Project, Service, SocialLink
+from .models import ContactMessage, Experience, Milestone, Project, Service, SocialLink, Technology
 
 
 class ContentApiTests(APITestCase):
@@ -84,6 +84,56 @@ class ContentApiTests(APITestCase):
     def test_content_is_read_only(self):
         self.assertEqual(self.client.post("/api/projects/", {"name": "x"}).status_code, 405)
 
+    def test_stack_groups_technologies_with_their_projects(self):
+        stack = {t["name"]: t for t in self.client.get("/api/technologies/").json()}
+        self.assertEqual(stack["Django"]["category"], "backend")
+        self.assertEqual(stack["OpenCV"]["projects"], ["rollcall"])
+        self.assertEqual(stack["PHP"], {"name": "PHP", "category": "language", "projects": []})
+
+    def test_stack_leaves_out_uncategorized_and_unpublished(self):
+        Technology.objects.create(name="COBOL")
+        Project.objects.filter(slug="rollcall").update(is_published=False)
+        stack = {t["name"]: t for t in self.client.get("/api/technologies/").json()}
+        self.assertNotIn("COBOL", stack)
+        self.assertEqual(stack["OpenCV"]["projects"], [])
+
+
+class ExperienceApiTests(APITestCase):
+    def test_seeded_job_comes_from_the_cv(self):
+        jobs = self.client.get("/api/experience/?lang=en").json()
+        self.assertEqual([(j["company"], j["role"], j["start"], j["end"]) for j in jobs],
+                         [("Universo de Fragancias", "Junior Software Developer", "2026-02-01", None)])
+        self.assertEqual(len(jobs[0]["highlights"]), 4)
+        self.assertIn("Tiendanube API", jobs[0]["technologies"])
+
+
+class ExperienceFieldsTests(APITestCase):
+    def setUp(self):
+        Experience.objects.all().delete()
+        job = Experience.objects.create(
+            company_es="Agencia de e-commerce", company_en="E-commerce agency",
+            role_es="Desarrollador web", role_en="Web developer",
+            start="2024-03-01", highlights_es="Tiendas en PHP.\n\n  Paneles de admin.  ",
+            highlights_en="PHP stores.\nAdmin panels.",
+        )
+        job.technologies.set(Technology.objects.filter(name__in=["PHP", "MySQL"]))
+        Experience.objects.create(
+            company_es="Oculta", company_en="Hidden", role_es="x", role_en="x",
+            start="2020-01-01", highlights_es="x", highlights_en="x", is_published=False,
+        )
+
+    def test_lists_published_jobs_in_the_language_asked(self):
+        jobs = self.client.get("/api/experience/?lang=en").json()
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]["company"], "E-commerce agency")
+        self.assertEqual(jobs[0]["role"], "Web developer")
+        self.assertIsNone(jobs[0]["end"])
+        self.assertEqual(jobs[0]["technologies"], ["MySQL", "PHP"])
+
+    def test_highlights_are_a_list_without_blank_lines(self):
+        job = self.client.get("/api/experience/").json()[0]
+        self.assertEqual(job["highlights"], ["Tiendas en PHP.", "Paneles de admin."])
+
 
 class ContactMessageApiTests(APITestCase):
     def setUp(self):
@@ -95,6 +145,23 @@ class ContactMessageApiTests(APITestCase):
         response = self.client.post("/api/messages/", {**self.valid, "service": service.pk})
         self.assertEqual(response.status_code, 201, response.content)
         self.assertEqual(ContactMessage.objects.get().service, service)
+
+    def test_job_offer_drops_the_service(self):
+        service = Service.objects.get(title_en="Full web apps")
+        response = self.client.post("/api/messages/", {**self.valid, "kind": "job", "service": service.pk})
+        self.assertEqual(response.status_code, 201, response.content)
+        message = ContactMessage.objects.get()
+        self.assertEqual(message.kind, ContactMessage.Kind.JOB)
+        self.assertIsNone(message.service)
+
+    def test_kind_defaults_to_project(self):
+        self.client.post("/api/messages/", self.valid)
+        self.assertEqual(ContactMessage.objects.get().kind, ContactMessage.Kind.PROJECT)
+
+    def test_rejects_unknown_kind(self):
+        response = self.client.post("/api/messages/", {**self.valid, "kind": "spam"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("kind", response.json())
 
     def test_service_is_optional(self):
         self.assertEqual(self.client.post("/api/messages/", self.valid).status_code, 201)
@@ -154,3 +221,10 @@ class ContactMessageAdminTests(APITestCase):
     def test_reply_falls_back_to_mailto(self):
         html = self.client.get("/admin/portfolio/contactmessage/").content.decode()
         self.assertIn('href="mailto:ana@example.com?subject=', html)
+
+    @override_settings(CONTACT_REPLY_GMAIL="")
+    def test_reply_to_a_job_offer(self):
+        self.message.kind = ContactMessage.Kind.JOB
+        self.message.save()
+        html = unescape(self.client.get("/admin/portfolio/contactmessage/").content.decode())
+        self.assertIn("subject=Re%3A+oferta+de+trabajo", html)

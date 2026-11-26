@@ -5,10 +5,11 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Service } from "@/lib/api";
 import { API_URL } from "@/lib/api-url";
-import { PICK_SERVICE_EVENT } from "./PickServiceButton";
+import { PICK_JOB_EVENT, PICK_SERVICE_EVENT } from "./PickServiceButton";
 
 type Status = "idle" | "sending" | "sent" | "invalid" | "throttled" | "network";
-type FieldErrors = Partial<Record<"name" | "email" | "message" | "service", string[]>>;
+type Kind = "project" | "job";
+type FieldErrors = Partial<Record<"kind" | "name" | "email" | "message" | "service", string[]>>;
 
 const field =
   "w-full rounded-xl border border-line bg-surface px-4 py-3 text-fg placeholder:text-muted/70 transition focus:border-accent focus:outline-none aria-invalid:border-red-500";
@@ -17,13 +18,22 @@ export function ContactForm({ services, lang, dict }: { services: Service[]; lan
   const t = dict.contact;
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [kind, setKind] = useState<Kind>("project");
   const [service, setService] = useState("");
 
-  // "Tell me your idea" in the services section preselects one
+  // "Tell me your idea" in the services section preselects one; "Hiring?" in the experience section switches to a job offer
   useEffect(() => {
-    const onPick = (e: Event) => setService(String((e as CustomEvent<number>).detail));
-    window.addEventListener(PICK_SERVICE_EVENT, onPick);
-    return () => window.removeEventListener(PICK_SERVICE_EVENT, onPick);
+    const onPickService = (e: Event) => {
+      setKind("project");
+      setService(String((e as CustomEvent<number>).detail));
+    };
+    const onPickJob = () => setKind("job");
+    window.addEventListener(PICK_SERVICE_EVENT, onPickService);
+    window.addEventListener(PICK_JOB_EVENT, onPickJob);
+    return () => {
+      window.removeEventListener(PICK_SERVICE_EVENT, onPickService);
+      window.removeEventListener(PICK_JOB_EVENT, onPickJob);
+    };
   }, []);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -37,10 +47,11 @@ export function ContactForm({ services, lang, dict }: { services: Service[]; lan
         method: "POST",
         // Django answers validation errors in this language
         headers: { "Content-Type": "application/json", "Accept-Language": lang },
-        body: JSON.stringify({ ...data, service: data.service ? Number(data.service) : null }),
+        body: JSON.stringify({ ...data, kind, service: kind === "project" && data.service ? Number(data.service) : null }),
       });
       if (response.status === 201) {
         form.reset();
+        setKind("project");
         setService("");
         setStatus("sent");
       } else if (response.status === 429) {
@@ -73,6 +84,20 @@ export function ContactForm({ services, lang, dict }: { services: Service[]; lan
 
   return (
     <form onSubmit={submit} noValidate data-no-burst className="relative flex flex-col gap-4 rounded-2xl border border-line bg-surface p-6 backdrop-blur-sm sm:p-8">
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className="mb-1.5 font-mono text-[0.78rem] text-muted">{t.kind}</legend>
+        <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-bg/60 p-1">
+          {(["project", "job"] as const).map((value) => (
+            <label
+              key={value}
+              className="cursor-pointer rounded-lg px-3 py-2 text-center text-[0.92rem] text-muted transition has-checked:bg-accent has-checked:font-semibold has-checked:text-accent-ink has-focus-visible:outline-2 has-focus-visible:outline-accent hover:text-fg has-checked:hover:text-accent-ink"
+            >
+              <input type="radio" name="kind" value={value} checked={kind === value} onChange={() => setKind(value)} className="sr-only" />
+              {value === "project" ? t.kindProject : t.kindJob}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="contact-name" label={t.name} errors={errors.name}>
           <input id="contact-name" name="name" required maxLength={120} autoComplete="name" aria-invalid={!!errors.name} className={field} />
@@ -81,24 +106,26 @@ export function ContactForm({ services, lang, dict }: { services: Service[]; lan
           <input id="contact-email" name="email" type="email" required autoComplete="email" aria-invalid={!!errors.email} className={field} />
         </Field>
       </div>
-      <Field id="contact-service" label={t.service} errors={errors.service}>
-        <select id="contact-service" name="service" value={service} onChange={(e) => setService(e.target.value)} className={field}>
-          <option value="">{t.serviceNone}</option>
-          {services.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.title}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field id="contact-message" label={t.message} errors={errors.message}>
+      {kind === "project" && (
+        <Field id="contact-service" label={t.service} errors={errors.service}>
+          <select id="contact-service" name="service" value={service} onChange={(e) => setService(e.target.value)} className={field}>
+            <option value="">{t.serviceNone}</option>
+            {services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+      <Field id="contact-message" label={kind === "job" ? t.messageJob : t.message} errors={errors.message}>
         <textarea
           id="contact-message"
           name="message"
           required
           maxLength={2000}
           rows={5}
-          placeholder={t.messagePlaceholder}
+          placeholder={kind === "job" ? t.messageJobPlaceholder : t.messagePlaceholder}
           aria-invalid={!!errors.message}
           className={`${field} resize-y`}
         />

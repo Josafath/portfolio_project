@@ -4,7 +4,17 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import ContactMessage, Improvement, Milestone, Project, ProjectVersion, Service, SocialLink, Technology
+from .models import (
+    ContactMessage,
+    Experience,
+    Improvement,
+    Milestone,
+    Project,
+    ProjectVersion,
+    Service,
+    SocialLink,
+    Technology,
+)
 
 admin.site.site_header = "Portafolio · admin"
 admin.site.site_title = "Portafolio"
@@ -23,6 +33,9 @@ class ImprovementInline(admin.StackedInline):
 
 @admin.register(Technology)
 class TechnologyAdmin(admin.ModelAdmin):
+    list_display = ("name", "category")
+    list_editable = ("category",)
+    list_filter = ("category",)
     search_fields = ("name",)
 
 
@@ -42,6 +55,17 @@ class MilestoneAdmin(admin.ModelAdmin):
     filter_horizontal = ("technologies",)
 
 
+@admin.register(Experience)
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ("role_es", "company_es", "start", "end", "order", "is_published")
+    list_editable = ("order", "is_published")
+    filter_horizontal = ("technologies",)
+    fields = (
+        ("company_es", "company_en"), ("role_es", "role_en"), ("start", "end"),
+        ("highlights_es", "highlights_en"), "technologies", ("order", "is_published"),
+    )
+
+
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ("title_es", "order")
@@ -58,10 +82,10 @@ class SocialLinkAdmin(admin.ModelAdmin):
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ("name", "email", "service", "created_at", "is_read", "reply")
-    list_filter = ("is_read", "service")
+    list_display = ("name", "email", "kind", "service", "created_at", "is_read", "reply")
+    list_filter = ("is_read", "kind", "service")
     search_fields = ("name", "email", "message")
-    readonly_fields = ("reply", "name", "email", "service", "message", "created_at")
+    readonly_fields = ("reply", "kind", "name", "email", "service", "message", "created_at")
     actions = ("mark_as_read",)
 
     def has_add_permission(self, request):
@@ -69,7 +93,12 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
     @admin.display(description="Responder")
     def reply(self, obj):
-        subject = f"Re: {obj.service.title_es}" if obj.service else "Re: tu mensaje en mi portafolio"
+        if obj.kind == ContactMessage.Kind.JOB:
+            subject = "Re: oferta de trabajo"
+        elif obj.service:
+            subject = f"Re: {obj.service.title_es}"
+        else:
+            subject = "Re: tu mensaje en mi portafolio"
         quoted = "\n".join(f"> {line}" for line in obj.message.splitlines())
         body = f"Hola {obj.name},\n\n\n\n{quoted}"
         # Gmail's compose window in the configured account; any mail app otherwise

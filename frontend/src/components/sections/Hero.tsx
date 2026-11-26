@@ -1,11 +1,13 @@
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { cvUrl } from "@/lib/cv";
 import { ArrowIcon, MagneticLink } from "../MagneticLink";
 import { Typewriter } from "../Typewriter";
 import { FadeOnScroll } from "./FadeOnScroll";
 
 export function Hero({ lang, dict }: { lang: Locale; dict: Dictionary }) {
   const t = dict.hero;
+  const cv = cvUrl(lang);
   return (
     <section id="top" data-scene="hero" data-scene-text="Josafath" className="pt-[clamp(40px,8vw,88px)] pb-[clamp(48px,7vw,80px)]">
       <div className="wrap">
@@ -35,6 +37,15 @@ export function Hero({ lang, dict }: { lang: Locale; dict: Dictionary }) {
                 {t.ctaProjects}
                 <ArrowIcon />
               </MagneticLink>
+              {cv ? (
+                <MagneticLink href={cv} variant="ghost" download prefetch={false}>
+                  {t.ctaCv}
+                </MagneticLink>
+              ) : (
+                <MagneticLink href={`/${lang}#experience`} variant="ghost">
+                  {t.ctaExperience}
+                </MagneticLink>
+              )}
               <MagneticLink href={`/${lang}#contact`} variant="ghost">
                 {t.ctaIdea}
               </MagneticLink>

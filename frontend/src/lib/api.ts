@@ -30,6 +30,18 @@ export type Milestone = {
   technologies: string[];
 };
 
+export type Experience = {
+  company: string;
+  role: string;
+  start: string;
+  end: string | null;
+  highlights: string[];
+  technologies: string[];
+};
+
+export type TechnologyCategory = "language" | "frontend" | "backend" | "data" | "desktop" | "tools";
+export type Technology = { name: string; category: TechnologyCategory; projects: string[] };
+
 export type Service = { id: number; title: string; description: string; examples: string[] };
 
 export type SocialLink = {
@@ -52,6 +64,8 @@ async function get<T>(path: string): Promise<T> {
 
 export const getProjects = (lang: Locale) => get<Project[]>(`projects/?lang=${lang}`);
 export const getMilestones = (lang: Locale) => get<Milestone[]>(`milestones/?lang=${lang}`);
+export const getExperience = (lang: Locale) => get<Experience[]>(`experience/?lang=${lang}`);
+export const getTechnologies = () => get<Technology[]>("technologies/");
 export const getServices = (lang: Locale) => get<Service[]>(`services/?lang=${lang}`);
 export const getSocialLinks = () => get<SocialLink[]>("socials/");
 

@@ -9,7 +9,17 @@ from django.db import models
 
 
 class Technology(models.Model):
+    class Category(models.TextChoices):
+        LANGUAGE = "language", "Lenguaje"
+        FRONTEND = "frontend", "Frontend"
+        BACKEND = "backend", "Backend"
+        DATA = "data", "Bases de datos"
+        DESKTOP = "desktop", "Escritorio y visión"
+        TOOLS = "tools", "Herramientas y deploy"
+
     name = models.CharField(max_length=60, unique=True)
+    # Groups the stack section; technologies without one are left out of it
+    category = models.CharField(max_length=20, choices=Category.choices, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -100,6 +110,29 @@ class Milestone(models.Model):
         return f"{self.shape} · {self.title_es}"
 
 
+class Experience(models.Model):
+    """A job. `highlights` holds one achievement per line, shown as a list."""
+
+    company_es = models.CharField(max_length=120, help_text="Sin nombres de clientes, p. ej. «Agencia de e-commerce».")
+    company_en = models.CharField(max_length=120)
+    role_es = models.CharField(max_length=120)
+    role_en = models.CharField(max_length=120)
+    start = models.DateField(help_text="Solo se muestran el mes y el año.")
+    end = models.DateField(null=True, blank=True, help_text="Vacío si es el trabajo actual.")
+    highlights_es = models.TextField(help_text="Un logro por línea.")
+    highlights_en = models.TextField(help_text="One achievement per line.")
+    technologies = models.ManyToManyField(Technology, related_name="experiences", blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "-start"]
+        verbose_name_plural = "experience"
+
+    def __str__(self) -> str:
+        return f"{self.role_es} · {self.company_es}"
+
+
 class Service(models.Model):
     """Something a visitor can hire for. `examples` are projects that prove it."""
 
@@ -145,6 +178,11 @@ class SocialLink(models.Model):
 
 
 class ContactMessage(models.Model):
+    class Kind(models.TextChoices):
+        PROJECT = "project", "Proyecto"
+        JOB = "job", "Oferta de trabajo"
+
+    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.PROJECT)
     name = models.CharField(max_length=120)
     email = models.EmailField()
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name="messages")

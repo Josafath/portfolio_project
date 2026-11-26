@@ -3,15 +3,17 @@ from django.utils.cache import patch_cache_control
 from rest_framework import generics
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import Milestone, Project, Service, SocialLink
+from .models import Experience, Milestone, Project, Service, SocialLink, Technology
 from .serializers import (
     DEFAULT_LANGUAGE,
     LANGUAGES,
     ContactMessageSerializer,
+    ExperienceSerializer,
     MilestoneSerializer,
     ProjectSerializer,
     ServiceSerializer,
     SocialLinkSerializer,
+    TechnologySerializer,
 )
 
 
@@ -51,6 +53,20 @@ class ProjectDetail(PublicContentMixin, generics.RetrieveAPIView):
 class MilestoneList(PublicContentMixin, generics.ListAPIView):
     queryset = Milestone.objects.filter(is_published=True).prefetch_related("technologies")
     serializer_class = MilestoneSerializer
+
+
+class ExperienceList(PublicContentMixin, generics.ListAPIView):
+    queryset = Experience.objects.filter(is_published=True).prefetch_related("technologies")
+    serializer_class = ExperienceSerializer
+
+
+class TechnologyList(PublicContentMixin, generics.ListAPIView):
+    """The stack: technologies with a category, and the published projects that use each one."""
+
+    queryset = Technology.objects.exclude(category="").prefetch_related(
+        Prefetch("projects", queryset=Project.objects.filter(is_published=True))
+    )
+    serializer_class = TechnologySerializer
 
 
 class ServiceList(PublicContentMixin, generics.ListAPIView):
