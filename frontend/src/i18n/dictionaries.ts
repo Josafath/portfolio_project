@@ -86,7 +86,7 @@ const es = {
     errorNetwork: "No se pudo enviar. Revisa tu conexión e intenta de nuevo.",
     or: "También me encuentras en",
   },
-  footer: { built: "Hecho con Next.js y Django.", source: "Código del sitio" },
+  footer: { built: "Hecho con Next.js y Django.", source: "Código del sitio", crn: "Fuera del código, bailo" },
   notFound: { title: "Esta página no existe", back: "Volver al inicio" },
 };
 
@@ -178,7 +178,7 @@ const en: Dictionary = {
     errorNetwork: "It couldn't be sent. Check your connection and try again.",
     or: "You can also find me on",
   },
-  footer: { built: "Built with Next.js and Django.", source: "Site source code" },
+  footer: { built: "Built with Next.js and Django.", source: "Site source code", crn: "Away from the code, I dance" },
   notFound: { title: "This page doesn't exist", back: "Back to home" },
 };
 

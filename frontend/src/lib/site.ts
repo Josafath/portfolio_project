@@ -3,6 +3,9 @@ import { locales, type Locale } from "@/i18n/config";
 /** The official address, used for canonical URLs, the sitemap and link previews. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://josafath-dev.vercel.app").replace(/\/$/, "");
 
+/** The dance site, linked from the footer so each brand leads to the other. */
+export const CRN_SITE_URL = "https://josafath-crn.vercel.app";
+
 /** Canonical and hreflang links for a path that exists in every language, e.g. "" or "/projects/rollcall". */
 export function alternatesFor(lang: Locale, path = "") {
   return {
