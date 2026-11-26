@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og";
-import { hasLocale } from "@/i18n/config";
+import { hasLocale, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const alt = "Josafath Cerón";
+
+// Built once per language at deploy time, so link previews never wait for it to render
+export function generateStaticParams() {
+  return locales.map((lang) => ({ lang }));
+}
 
 /** The preview LinkedIn, WhatsApp and search engines show for a shared link. */
 export default async function OpengraphImage({ params }: { params: Promise<{ lang: string }> }) {
